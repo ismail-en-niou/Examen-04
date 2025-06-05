@@ -1,0 +1,18 @@
+backtrack(s, index, lremove, rremove, result):
+    if lremove == 0 && rremove == 0:
+        if is_valid(s):
+            print s with removed chars replaced by space
+        return
+
+    for i from index to len(s):
+        // Skip duplicates: don't remove the same char twice
+        if i > index && s[i] == s[i-1]:
+            continue
+
+        // Try removing '('
+        if s[i] == '(' && lremove > 0:
+            remove s[i] and recurse with lremove - 1
+
+        // Try removing ')'
+        if s[i] == ')' && rremove > 0:
+            remove s[i] and recurse with rremove - 1

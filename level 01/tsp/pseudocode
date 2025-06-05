@@ -1,0 +1,29 @@
+function tsp(points: list of coordinates, size: int) -> float
+    best_distance = ∞
+    visited = array of bool of size 'size' initialized to false
+    path = array to store current path indices
+
+    function backtrack(depth: int, current_distance: float, last_city: int)
+        if depth == size:
+            // Add distance to return to starting city
+            total_distance = current_distance + distance(points[last_city], points[path[0]])
+            best_distance = min(best_distance, total_distance)
+            return
+
+        for i in 0 to size-1:
+            if not visited[i]:
+                visited[i] = true
+                path[depth] = i
+
+                if depth == 0:
+                    // No previous city, so no distance to add
+                    backtrack(depth + 1, 0, i)
+                else:
+                    prev = path[depth - 1]
+                    dist = distance(points[prev], points[i])
+                    backtrack(depth + 1, current_distance + dist, i)
+
+                visited[i] = false
+
+    backtrack(0, 0.0, -1)
+    return best_distance
