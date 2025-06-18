@@ -1,0 +1,8 @@
+{
+    "C_Cpp.errorSquiggles": "disabled",
+    "files.associations": {
+        "tsp.h": "c",
+        "locale": "c",
+        "ctype.h": "c"
+    }
+}
