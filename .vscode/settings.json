@@ -3,6 +3,10 @@
     "files.associations": {
         "tsp.h": "c",
         "locale": "c",
-        "ctype.h": "c"
+        "ctype.h": "c",
+        "stdlib.h": "c",
+        "string.h": "c",
+        "types.h": "c"
     }
+    "powermode.enabled": true
 }

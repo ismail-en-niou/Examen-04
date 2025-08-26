@@ -1,18 +1,19 @@
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <signal.h>
-#include <errno.h>
+#include <sys/signal.h>
+#include <unistd.h>
 #include <sys/wait.h>
-#include <sys/types.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <errno.h>
 #include <string.h>
+#include <sys/resource.h>
 
 int g = 0;
 
-void handeler(int a)
+void handel(int sig)
 {
-    (void )a ;
+    (void) sig;
     g = 1;
 }
 
@@ -20,27 +21,26 @@ int sandbox(void (*f)(void), unsigned int timeout, bool verbose)
 {
     pid_t pid;
     int status;
-
+    int result;
     pid = fork();
-    if (pid < 0)
+    if (pid == -1)
         return -1;
     if (pid == 0)
     {
         alarm(timeout);
         f();
-        exit(1);
+        exit(0);
     }
-
     struct  sigaction sa;
-    sa.sa_handler = handeler;
+    sa.sa_handler = handel;
     sa.sa_flags = 0;
     sigemptyset(&sa.sa_mask);
-    sigaction(SIGALRM , &sa , NULL);
+    sigaction(SIGALRM , &sa , 0);
     alarm(timeout);
-    int res = waitpid(pid , &status , 0);
-    if (res == -1 || g == 1)
+    result = waitpid(pid , &status , 0);
+    if ( result == -1 || g )
     {
-        if (errno == 4 || g == 1)
+        if (errno ==  4 || g)
         {
             kill(pid , SIGKILL);
             waitpid(pid , NULL , 0);
@@ -49,15 +49,13 @@ int sandbox(void (*f)(void), unsigned int timeout, bool verbose)
         }
         return -1;
     }
-    if ( WIFEXITED(status))
+    if (WIFEXITED(status))
     {
         if (WEXITSTATUS(status) == 0)
         {
             if (verbose) printf("Nice function!\n");
             return 1;
-        }
-        else
-        {
+        }else{
             if (verbose) printf("Bad function: exited with code %d\n", WEXITSTATUS(status));
             return 0;
         }
@@ -67,4 +65,5 @@ int sandbox(void (*f)(void), unsigned int timeout, bool verbose)
         if (verbose) printf("Bad function: %s\n", strsignal(WTERMSIG(status)));
         return 0;
     }
+    return -1;
 }

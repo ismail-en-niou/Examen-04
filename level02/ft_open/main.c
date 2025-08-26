@@ -195,6 +195,5 @@ int main()
     test_write_mode();
     test_invalid_params();
     test_cmd_not_found();
-    while (1);
     return 0;
 }

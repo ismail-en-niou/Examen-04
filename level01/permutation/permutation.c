@@ -26,18 +26,23 @@ void ft_sort(char *str) {
     }
 }
 
-void    ft_permutation(int l , int r , char *str)
+void    ft_permutation(int l , int r , char *str ,char *perm ,char *used)
 {
     if (l == r)
-        puts(str);
-    else
     {
-        for (int i = l; i <= r; i++)
+        perm[r] = '\0';
+        puts(perm);
+        return ;
+    }
+    for (int i = 0 ; i < r ; ++i)
+    {
+        if(!used[i])
         {
-            swap(&str[l] , &str[i]);
-            ft_permutation(l + 1 , r , str);
-            swap(&str[l] , &str[i]);
-        } 
+            used[i] = 1;
+            perm[l] = str[i];
+            ft_permutation(l + 1, r , str  ,perm ,  used);
+            used[i] = 0;
+        }
     }
 }
 
@@ -52,8 +57,10 @@ int main(int ac, char **av) {
     for (int i = 0; i < len; i++)
         str[i] = av[1][i];
     str[len] = '\0';
+    char *used = calloc(len , sizeof(char));
+    char *perm = calloc(len + 1 , sizeof(char));
     ft_sort(str);
-    ft_permutation(0, len - 1,str);
+    ft_permutation(0, len ,str , perm, used);
     free(str);
     return 0;
 }

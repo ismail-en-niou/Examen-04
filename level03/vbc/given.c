@@ -14,7 +14,6 @@ typedef struct node {
 }   node;
 
 
-
 node    *new_node(node n)
 {
     node *ret = calloc(1, sizeof(n));
@@ -64,21 +63,21 @@ int expect(char **s, char c)
 
 //...
 
-node *parse_mul(char **s);
-node    *parse_expr(char **s);
+
 node *parse_string(char **s);
+node *parse_mul(char **s);
+node   *parse_expr(char **s);
 
 node *parse_string(char **s)
 {
-    node *res;
+    node *res = NULL;
     node tmp;
 
-    res = NULL;
     if (**s == '(')
     {
         (*s)++;
         res = parse_expr(s);
-        if (!res || **s != ')')
+        if (res == NULL || (**s) == ')')
         {
             destroy_tree(res);
             unexpected(**s);
@@ -92,6 +91,8 @@ node *parse_string(char **s)
         tmp.type = VAL;
         tmp.val = **s - '0';
         res = new_node(tmp);
+        if (!res)
+            return NULL;
         (*s)++;
         return res;
     }
@@ -99,15 +100,13 @@ node *parse_string(char **s)
     return NULL;
 }
 
-node    *parse_mul(char **s)
+node *parse_mul(char **s)
 {
     node *left;
     node *right;
     node tmp;
 
     left = parse_string(s);
-    if (!left)
-        return NULL;
     while (**s == '*')
     {
         (*s)++;
@@ -132,8 +131,6 @@ node    *parse_expr(char **s)
     node tmp;
 
     left = parse_mul(s);
-    if (!left)
-        return NULL;
     while (**s == '+')
     {
         (*s)++;
@@ -164,33 +161,10 @@ int eval_tree(node *tree)
     }
 }
 
-int check_balence(char *s)
-{
-    int bal = 0;
-
-    for (int i = 0 ; s[i] ; i++)
-    {
-        if (s[i] == '(')
-            bal++;
-        else if (s[i] == ')')
-        {
-            if (bal < 0)
-                return 0;
-            bal--;
-        }
-    }
-    return (bal == 0);
-}
-
 int main(int argc, char **argv)
 {
     if (argc != 2)
         return (1);
-    if (!check_balence(argv[1]))
-    {
-        printf("Unexpected token ')'");
-        return 1;   
-    }
     node *tree = parse_expr(&argv[1]);
     if (!tree)
         return (1);

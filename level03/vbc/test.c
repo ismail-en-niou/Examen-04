@@ -41,7 +41,7 @@ void    unexpected(char c)
     if (c)
         printf("Unexpected token '%c'\n", c);
     else
-        printf("Unexpected end of file\n");
+        printf("Unexpected end of input\n");
 }
 
 int accept(char **s, char c)
@@ -68,12 +68,12 @@ node *parse_mul(char **s);
 node    *parse_expr(char **s);
 node *parse_string(char **s);
 
+
 node *parse_string(char **s)
 {
-    node *res;
+    node *res = NULL;
     node tmp;
 
-    res = NULL;
     if (**s == '(')
     {
         (*s)++;
@@ -89,10 +89,10 @@ node *parse_string(char **s)
     }
     if (isdigit(**s))
     {
-        tmp.type = VAL;
         tmp.val = **s - '0';
-        res = new_node(tmp);
+        tmp.type = VAL;
         (*s)++;
+        res = new_node(tmp);
         return res;
     }
     unexpected(**s);
@@ -101,13 +101,13 @@ node *parse_string(char **s)
 
 node    *parse_mul(char **s)
 {
-    node *left;
-    node *right;
-    node tmp;
+    node    *left;
+    node    *right;
+    node    tmp;
 
     left = parse_string(s);
     if (!left)
-        return NULL;
+        return (NULL);
     while (**s == '*')
     {
         (*s)++;
@@ -115,25 +115,27 @@ node    *parse_mul(char **s)
         if (!right)
         {
             destroy_tree(left);
-            return NULL;
+            return (NULL);
         }
+        tmp.type = MULTI;
         tmp.l = left;
         tmp.r = right;
-        tmp.type = MULTI;
         left = new_node(tmp);
     }
-    return left;
+    return (left);
 }
+
+
 
 node    *parse_expr(char **s)
 {
-    node *left;
-    node *right;
-    node tmp;
+    node    *left;
+    node    *right;
+    node    tmp;
 
     left = parse_mul(s);
     if (!left)
-        return NULL;
+        return (NULL);
     while (**s == '+')
     {
         (*s)++;
@@ -141,14 +143,14 @@ node    *parse_expr(char **s)
         if (!right)
         {
             destroy_tree(left);
-            return NULL;
+            return (NULL);
         }
+        tmp.type = ADD;
         tmp.l = left;
         tmp.r = right;
-        tmp.type = ADD;
         left = new_node(tmp);
     }
-    return left;
+    return (left);
 }
 
 int eval_tree(node *tree)
@@ -164,33 +166,33 @@ int eval_tree(node *tree)
     }
 }
 
-int check_balence(char *s)
+int check_balance(char *s)
 {
-    int bal = 0;
+	int flag = 0;
+	int i = 0;
 
-    for (int i = 0 ; s[i] ; i++)
-    {
-        if (s[i] == '(')
-            bal++;
-        else if (s[i] == ')')
-        {
-            if (bal < 0)
-                return 0;
-            bal--;
-        }
-    }
-    return (bal == 0);
+	while (s[i])
+	{
+		if(s[i] == '(')
+			flag++;
+		if(s[i] == ')')
+		{
+			flag--;
+			if(flag < 0)
+				return -1;
+		}
+		i++;
+	}
+	return flag;
 }
+
 
 int main(int argc, char **argv)
 {
     if (argc != 2)
         return (1);
-    if (!check_balence(argv[1]))
-    {
-        printf("Unexpected token ')'");
-        return 1;   
-    }
+    if (check_balance(argv[1]) == -1)
+        return(printf("Unexpected token ')'\n"), 1);
     node *tree = parse_expr(&argv[1]);
     if (!tree)
         return (1);

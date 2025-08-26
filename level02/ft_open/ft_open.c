@@ -25,14 +25,16 @@ int ft_popen(const char *file, char *const argv[], char type)
         if (type == 'r')
         {
             dup2(fd[1] , STDOUT_FILENO);
-            execvp(file , argv);
-            exit(1);
+            close(fd[0]);
+            close(fd[1]);
         }else 
         {
             dup2(fd[0] , STDIN_FILENO);
-            execvp(file,argv);
-            exit(1);
+            close(fd[0]);
+            close(fd[1]);
         }
+        execvp(file,argv);
+        exit(1);
     }
     if (type == 'r')
     {

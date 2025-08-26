@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <float.h>
 
 // Swap two integers (used for permutations)
-void swap(int *a, int *b) {
+
+void swap_f(int *a, int *b) {
     int tmp = *a;
     *a = *b;
     *b = tmp;
@@ -21,33 +23,31 @@ void tsp_recursive(float (*points)[2], int *tab, int start, int size, float *min
 {
     if (start == size)
     {
-        float dist = 0.0;
-        for (int i = 0; i < size - 1; i++) {
-            dist += distance(points[tab[i]], points[tab[i + 1]]);
-        }
-        dist += distance(points[tab[size - 1]], points[tab[0]]); // return to start
-        if (dist < *min_dist)
-            *min_dist = dist;
-        return;
+        float min = 0.0;
+        for (int i = 0; i < size - 1; i++)
+            min += distance(points[tab[i]] , points[tab[i + 1]]);
+        min += distance(points[tab[size - 1]] , points[tab[0]]);
+        if (min < *min_dist)
+            *min_dist = min;
+        return ;
     }
-    for (int i = start ; i < size ; i++)
+    for (int i = start  ;i < size ;i ++)
     {
-        swap(&tab[start] , &tab[i]);
-        tsp_recursive(points ,tab , start + 1 , size , min_dist);
-        swap(&tab[start] , &tab[i]);
+        swap_f(&tab[start] , &tab[i]);
+        tsp_recursive(points , tab , start + 1 , size , min_dist);
+        swap_f(&tab[start] , &tab[i]);
     }
 }
 
 
 // Entry point for TSP algorithm
-float tsp(float (*points)[2], int size) {
-    int *perm = malloc(sizeof(int) * size);
-    if (!perm) return -1.0f;
-    for (int i = 0; i < size; i++)
+float tsp(float (*points)[2], int size) 
+{
+    float min_dist = FLT_MAX_EXP;
+    int *perm = malloc(size * sizeof(int ));
+    for (int i = 0 ; i < size ; i++)
         perm[i] = i;
-    float min_dist = INFINITY;
-    tsp_recursive(points, perm, 0, size, &min_dist);
-    free(perm);
+    tsp_recursive(points , perm , 0 , size , &min_dist);
     return min_dist;
 }
 

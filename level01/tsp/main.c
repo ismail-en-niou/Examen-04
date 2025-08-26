@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-
+#include <float.h>
 // Swap two integers (used for permutations)
 void swap_f(int *a, int *b) {
     int tmp = *a;
@@ -11,45 +11,39 @@ void swap_f(int *a, int *b) {
     *b = tmp;
 }
 
-// Compute the Euclidean distance between two points
 float distance(float a[2], float b[2]) {
     return sqrtf((b[0] - a[0]) * (b[0] - a[0]) + (b[1] - a[1]) * (b[1] - a[1]));
 }
 
-// Recursive permutation-based TSP
-void tsp_recursive(float (*point)[2] ,int start ,int size , float *mindist , int *perm) 
+
+void backtrack(float (*point)[2] , int size , int index , int *perm , float *min_dis)
 {
-    if (start == size)
+    if (size == index)
     {
-        float dist = 0.0;
-        for (int i = 0; i < size - 1; i++)
-            dist += distance(point[perm[i]] , point[perm[i + 1]]);
-        dist += distance(point[perm[size - 1]] , point[perm[0]]);
-        if (*mindist > dist)
-            *mindist = dist;
+        float min = 0.0f;
+        for (int i = 0 ; i < size - 1; i++)
+            min+= distance(point[perm[i]] , point[perm[i + 1]]);
+        min+= distance(point[perm[0]] , point[perm[size - 1]]);
+        if (min < *min_dis)
+            *min_dis = min;
         return;
     }
-    for (int i = start ; i < size; i++)
+    for (int i = index ; i < size ; i++)
     {
-        swap_f(&perm[i],&perm[start]);
-        tsp_recursive(point,start + 1 , size , mindist , perm);
-        swap_f(&perm[i],&perm[start]);
+        swap_f(&perm[index] , &perm[i]);
+        backtrack(point , size , index + 1 , perm , min_dis);
+        swap_f(&perm[index] , &perm[i]);
     }
-    
 }
 
-
-// Entry point for TSP algorithm
 float tsp(float (*points)[2], int size) 
 {
-    int *perm = malloc(size * sizeof(int));
-    if (!perm) return -1.0f;
-    float mindist = INFINITY;
-    for (int i = 0 ; i < size ; i++)
+    float   min_dist = INFINITY;
+    int *perm = malloc(sizeof(int) * size);
+    for (int i= 0 ; i < size ;i++)
         perm[i] = i;
-    tsp_recursive(points,0,size,&mindist,perm);
-    free(perm);
-    return mindist;
+    backtrack(points , size , 0 , perm , &min_dist);
+    return min_dist;
 }
 
 // Count number of valid lines in file
