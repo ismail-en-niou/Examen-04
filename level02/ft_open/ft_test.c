@@ -2,39 +2,43 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-int ft_popen(const char *file, char *const argv[], char type)
-{
+// pipe, fork, dup2, execvp, close, exit
+
+
+int ft_popen(const char *file, char *const argv[], char type){
     if (!file || !argv || (type != 'r' && type != 'w'))
         return -1;
     pid_t pid;
-    int fds[2];
-    if (pipe(fds) == -1)
+    int fd[2];
+
+    if (pipe(fd) == -1)
         return -1;
     pid = fork();
     if (pid == -1)
-    {
-        close(fds[1]);
-        close(fds[0]);
         return -1;
-    }
     if (pid == 0)
     {
         if (type == 'r')
-            dup2(fds[1] , 1);
-        else
-            dup2(fds[0] , 0);
-        close(fds[1]);
-        close(fds[0]);
-        execvp(file , argv );
-        exit(1);
+        {
+            dup2(fd[1] , 1);
+            close(fd[1]);
+            close(fd[0]);
+        }else if (type == 'w')
+        {
+            dup2(fd[0], 0);
+            close(fd[0]);
+            close(fd[1]);
+        }
+        execvp(file , argv);
+        exit(0);
     }
     if (type == 'r')
     {
-        close (fds[1]);
-        return fds[0];
+        close(fd[1]);
+        return fd[0];
     }else {
-        close(fds[0]);
-        return fds[1];
+        close(fd[0]);
+        return fd[1];
     }
     return -1;
 }
